@@ -1,0 +1,3 @@
+[submodule "bundle/project"]
+	path = bundle/project
+	url = https://github.com/eherve/project.tar.gz.git
