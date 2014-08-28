@@ -55,5 +55,36 @@ fi
 ## Install vim configuration ##
 ###############################
 
-debug "Install vim configuration"
-echo "TODO"
+debug "Install vim configuration..."
+
+# .vimrc
+vimrc=~/.vimrc
+debug "Copy vimrc as $vimrc"
+cp "vimrc" $vimrc
+
+# .vim folder
+vim=~/.vim
+if [ ! -d $vim ]; then
+  debug "Create $vim folder"
+  mkdir $vim
+fi
+
+# .vim/autoload
+al=~/.vim/autoload
+if [ ! -d $al ]; then
+  debug "Create $al folder"
+  mkdir $al
+fi
+debug "Copy pathogen into $al"
+cp pathogen/autoload/pathogen.vim $al/
+
+# .vim/bundle folder
+bundle=~/.vim/bundle
+if [ ! -d $bundle ]; then
+  debug "Create $bundle folder"
+  mkdir $bundle
+fi
+debug "Copy bundle folder content in $bundle folder"
+cp -r bundle/* $bundle/
+
+debug "Done !"
