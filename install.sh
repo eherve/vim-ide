@@ -77,7 +77,7 @@ if [ ! -d $al ]; then
   debug "Create $al folder"
   mkdir $al
 fi
-debug "Copy pathogen into $al"
+debug "Copy pathogen into $al folder"
 cp pathogen/autoload/pathogen.vim $al/
 
 # .vim/bundle folder
@@ -86,7 +86,43 @@ if [ ! -d $bundle ]; then
   debug "Create $bundle folder"
   mkdir $bundle
 fi
-debug "Copy bundle folder content in $bundle folder"
+debug "Copy bundle folder content into $bundle folder"
 cp -r bundle/* $bundle/
+
+# .vim/ftdetect
+ftdetect=~/.vim/ftdetect
+if [ ! -d $ftdetect ]; then
+  debug "Create $ftdetect folder"
+  mkdir $ftdetect
+fi
+debug "Copy ftdetect folder content into $ftdetect folder"
+cp -r ftdetect/* $ftdetect/
+
+# .vim/ftplugin
+ftplugin=~/.vim/ftplugin
+if [ ! -d $ftplugin ]; then
+  debug "Create $ftplugin folder"
+  mkdir $ftplugin
+fi
+debug "Copy ftplugin folder content into $ftplugin folder"
+cp -r ftplugin/* $ftplugin/
+
+# .vim/indent
+indent=~/.vim/indent
+if [ ! -d $indent ]; then
+  debug "Create $indent folder"
+  mkdir $indent
+fi
+debug "Copy indent folder content into $indent folder"
+cp -r indent/* $indent/
+
+# .vim/syntax
+syntax=~/.vim/syntax
+if [ ! -d $syntax ]; then
+  debug "Create $syntax folder"
+  mkdir $syntax
+fi
+debug "Copy syntax folder content into $syntax folder"
+cp -r syntax/* $syntax/
 
 debug "Done !"
