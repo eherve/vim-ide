@@ -30,13 +30,15 @@ error() {
 ## Save previous configuration ##
 #################################
 
-if [ $save -eq 1 ]; then
+if [ $save -eq 0 ]; then
   debug "Save existing configuration..."
-  if [ ! -d "save" ]; then
+  savefolder="/tmp/save-vim"
+  if [ ! -d $savefolder ]; then
     debug "Create save folder"
-    mkdir "save"
+    mkdir $savefolder
   fi
-  foldername="save/"$(date -d "today" +"%Y.%m.%d.%H.%M")
+  saveDate=$(date +"%y-%m-%d_%H-%M")
+  foldername=$savefolder/$saveDate
   if [ ! -d $foldername ]; then
     debug "Create $foldername folder"
     mkdir $foldername
