@@ -71,6 +71,7 @@ let Tlist_GainFocus_On_ToggleOpen=1
 let Tlist_Show_One_File=1
 let Tlist_Use_Right_Window=1
 set tags=tags,.tags;~
+nmap <c-t> :!ctags -R -f .tags<CR>
 
 " tagbar
 nmap <F8> :TagbarToggle<CR>
