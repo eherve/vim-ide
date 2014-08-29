@@ -31,7 +31,9 @@ error() {
 #################################
 
 if [ $save -eq 0 ]; then
+
   debug "Save existing configuration..."
+
   savefolder="/tmp/save-vim"
   if [ ! -d $savefolder ]; then
     debug "Create save folder"
@@ -48,9 +50,12 @@ if [ $save -eq 0 ]; then
   fi
   vimrc=~/.vimrc
   vim=~/.vim
-  debug "Copy $vim et $vimrc in $foldername"
-  cp -r $vim $vimrc $foldername/
+  ctags=~/.ctags
+  debug "Copy $vim, $vimrc, $ctags in $foldername"
+  cp -r $vim $vimrc $ctags $foldername/
+
   debug "Done !"
+
 fi
 
 ###############################
@@ -124,5 +129,17 @@ if [ ! -d $syntax ]; then
 fi
 debug "Copy syntax folder content into $syntax folder"
 cp -r syntax/* $syntax/
+
+debug "Done !"
+
+#################################
+## Install ctags configuration ##
+#################################
+
+debug "Install ctags configuration..."
+
+ctags=~/.ctags
+debug "Copy ctags as $ctags"
+cp "ctags" $ctags
 
 debug "Done !"
