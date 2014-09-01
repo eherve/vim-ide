@@ -43,6 +43,7 @@ set incsearch " select search result when taping
 set wildmenu " show completion menu
 set wildmode=list:longest,list:full " show all possibilities
 set wildignore=*.o,*.r,*.so,*.sl,*.tar,*.tgz,*.swp,*.jar " completion filter
+set omnifunc=syntaxcomplete#Complete
 
 " Tabulation size
 set expandtab " use space for tab
@@ -70,7 +71,7 @@ let Tlist_Ctags_Cmd='/usr/bin/ctags'
 let Tlist_GainFocus_On_ToggleOpen=1
 let Tlist_Show_One_File=1
 let Tlist_Use_Right_Window=1
-set tags=tags,.tags;~
+set tags=.tags;~
 nmap <c-t> :!ctags -R -f .tags<CR>
 
 " tagbar
