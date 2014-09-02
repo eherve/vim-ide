@@ -67,12 +67,19 @@ autocmd BufWrite *.coffee :call DeleteTrailingWS()
 autocmd BufWrite *.java :call DeleteTrailingWS()
 
 " ctags
-let Tlist_Ctags_Cmd='/usr/bin/ctags'
+let ctags='/usr/bin/ctags'
+let Tlist_Ctags_Cmd=ctags
 let Tlist_GainFocus_On_ToggleOpen=1
 let Tlist_Show_One_File=1
 let Tlist_Use_Right_Window=1
+
 set tags=.tags;~
 nmap <c-t> :!ctags -R -f .tags<CR>
+
+" easy tag
+let g:easytags_cmd=ctags
+let g:easytags_file='.tags'
+let g:easytags_async=1
 
 " tagbar
 nmap <F8> :TagbarToggle<CR>
