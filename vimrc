@@ -73,13 +73,14 @@ let Tlist_GainFocus_On_ToggleOpen=1
 let Tlist_Show_One_File=1
 let Tlist_Use_Right_Window=1
 
-set tags=.tags;~
+set tags=.tags
 nmap <c-t> :!ctags -R -f .tags<CR>
 
 " easy tag
 let g:easytags_cmd=ctags
-let g:easytags_file='.tags'
 let g:easytags_async=1
+let g:easytags_dynamic_files=2
+let g:easytags_events=['BufWritePost']
 
 " tagbar
 nmap <F8> :TagbarToggle<CR>

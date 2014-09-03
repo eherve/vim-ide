@@ -419,22 +419,22 @@ function! s:CompleteAfterDot(expr)
       call s:Info('O1. ' . items[k] . ' ' . join(items[:k-1], '.'))
       let ti = s:DoGetClassInfo(items[k] == 'class' ? 'java.lang.Class' : join(items[:k-1], '.'))
       if !empty(ti)
-	let itemkind = items[k] ==# 'this' ? 1 : items[k] ==# 'super' ? 2 : 0
-	let ii = k+1
+        let itemkind = items[k] ==# 'this' ? 1 : items[k] ==# 'super' ? 2 : 0
+        let ii = k+1
       else
-	return []
+        return []
       endif
 
-    " case: "java.io.File.|"
+      " case: "java.io.File.|"
     else
       let fqn = join(items[:i-1], '.')
       let srcpath = join(s:GetSourceDirs(expand('%:p'), s:GetPackageName()), ',')
       call s:Info('O2. ' . fqn)
       call s:DoGetTypeInfoForFQN([fqn], srcpath)
       if get(get(s:cache, fqn, {}), 'tag', '') == 'CLASSDEF'
-	let ti = s:cache[fqn]
-	let itemkind = 11
-	let ii = i
+        let ti = s:cache[fqn]
+        let itemkind = 11
+        let ii = i
       endif
     endif
   endif
@@ -454,95 +454,97 @@ function! s:CompleteAfterDot(expr)
       let ident = substitute(items[0], '\s', '', 'g')
 
       if s:IsKeyword(ident)
-	" 1)
-	call s:Info('F1. "' . ident . '.|"')
-	if ident ==# 'void' || s:IsBuiltinType(ident)
-	  let ti = s:PRIMITIVE_TYPE_INFO
-	  let itemkind = 11
+        " 1)
+        call s:Info('F1. "' . ident . '.|"')
+        if ident ==# 'void' || s:IsBuiltinType(ident)
+          let ti = s:PRIMITIVE_TYPE_INFO
+          let itemkind = 11
 
-	" 2)
-	call s:Info('F2. "' . ident . '.|"')
-	elseif ident ==# 'this' || ident ==# 'super'
-	  let itemkind = ident ==# 'this' ? 1 : ident ==# 'super' ? 2 : 0
-	  let ti = s:DoGetClassInfo(ident)
-	endif
+          " 2)
+          call s:Info('F2. "' . ident . '.|"')
+        elseif ident ==# 'this' || ident ==# 'super'
+          let itemkind = ident ==# 'this' ? 1 : ident ==# 'super' ? 2 : 0
+          let ti = s:DoGetClassInfo(ident)
+        endif
 
       else
-	" 3)
-	let typename = s:GetDeclaredClassName(ident)
-	call s:Info('F3. "' . ident . '.|"  typename: "' . typename . '"')
-	if (typename != '')
-	  if typename[0] == '[' || typename[-1:] == ']'
-	    let ti = s:ARRAY_TYPE_INFO
-	  elseif typename != 'void' && !s:IsBuiltinType(typename)
-	    let ti = s:DoGetClassInfo(typename)
-	  endif
+        " 3)
+        let typename = s:GetDeclaredClassName(ident)
+        call s:Info('F3. "' . ident . '.|"  typename: "' . typename . '"')
+        if (typename != '')
+          if typename[0] == '[' || typename[-1:] == ']'
+            let ti = s:ARRAY_TYPE_INFO
+          elseif typename != 'void' && !s:IsBuiltinType(typename)
+            let ti = s:DoGetClassInfo(typename)
+            let ti['tag'] = 'CLASSDEF'
+          endif
 
-	else
-	  " 4)
-	  call s:Info('F4. "TypeName.|"')
-	  let ti = s:DoGetClassInfo(ident)
-	  let itemkind = 11
+        else
+          " 4)
+          call s:Info('F4. "TypeName.|"')
+          let ti = s:DoGetClassInfo(ident)
+          let itemkind = 11
 
-	  if get(ti, 'tag', '') != 'CLASSDEF'
-	    let ti = {}
-	  endif
+          "echom 'tag '.get(ti, 'tag', '')
+          if get(ti, 'tag', '') != 'CLASSDEF'
+            let ti = {}
+          endif
 
-	  " 5)
-	  if empty(ti)
-	    call s:Info('F5. "package.|"')
-	    unlet ti
-	    let ti = s:GetMembers(ident)	" s:DoGetPackegInfo(ident)
-	    let itemkind = 20
-	  endif
-	endif
+          " 5)
+          if empty(ti)
+            call s:Info('F5. "package.|"')
+            unlet ti
+            let ti = s:GetMembers(ident)	" s:DoGetPackegInfo(ident)
+            let itemkind = 20
+          endif
+        endif
       endif
 
-    " method invocation:	"method().|"	- "this.method().|"
+      " method invocation:	"method().|"	- "this.method().|"
     elseif items[0] =~ '^\s*' . s:RE_IDENTIFIER . '\s*('
       let ti = s:MethodInvocation(items[0], ti, itemkind)
 
-    " array type, return `class`: "int[] [].|", "java.lang.String[].|", "NestedClass[].|"
+      " array type, return `class`: "int[] [].|", "java.lang.String[].|", "NestedClass[].|"
     elseif items[0] =~# s:RE_ARRAY_TYPE
       call s:Info('array type. "' . items[0] . '"')
       let qid = substitute(items[0], s:RE_ARRAY_TYPE, '\1', '')
       if s:IsBuiltinType(qid) || (!s:HasKeyword(qid) && !empty(s:DoGetClassInfo(qid)))
-	let ti = s:PRIMITIVE_TYPE_INFO
-	let itemkind = 11
+        let ti = s:PRIMITIVE_TYPE_INFO
+        let itemkind = 11
       endif
 
-    " class instance creation expr:	"new String().|", "new NonLoadableClass().|"
-    " array creation expr:	"new int[i=1] [val()].|", "new java.lang.String[].|"
+      " class instance creation expr:	"new String().|", "new NonLoadableClass().|"
+      " array creation expr:	"new int[i=1] [val()].|", "new java.lang.String[].|"
     elseif items[0] =~ '^\s*new\s\+'
       call s:Info('creation expr. "' . items[0] . '"')
       let subs = split(substitute(items[0], '^\s*new\s\+\(' .s:RE_QUALID. '\)\s*\([([]\)', '\1;\2', ''), ';')
       if subs[1][0] == '['
-	let ti = s:ARRAY_TYPE_INFO
+        let ti = s:ARRAY_TYPE_INFO
       elseif subs[1][0] == '('
-	let ti = s:DoGetClassInfo(subs[0])
-	" exclude interfaces and abstract class.  TODO: exclude the inaccessible
-	if get(ti, 'flags', '')[-10:-10] || get(ti, 'flags', '')[-11:-11]
-	  echo 'cannot instantiate the type ' . subs[0]
-	  let ti = {}
-	  return []
-	endif
+        let ti = s:DoGetClassInfo(subs[0])
+        " exclude interfaces and abstract class.  TODO: exclude the inaccessible
+        if get(ti, 'flags', '')[-10:-10] || get(ti, 'flags', '')[-11:-11]
+          echo 'cannot instantiate the type ' . subs[0]
+          let ti = {}
+          return []
+        endif
       endif
 
-    " casting conversion:	"(Object)o.|"
+      " casting conversion:	"(Object)o.|"
     elseif items[0] =~ s:RE_CASTING
       call s:Info('Casting conversion. "' . items[0] . '"')
       let subs = split(substitute(items[0], s:RE_CASTING, '\1;\2', ''), ';')
       let ti = s:DoGetClassInfo(subs[0])
 
-    " array access:	"var[i][j].|"		Note: "var[i][]" is incorrect
+      " array access:	"var[i][j].|"		Note: "var[i][]" is incorrect
     elseif items[0] =~# s:RE_ARRAY_ACCESS
       let subs = split(substitute(items[0], s:RE_ARRAY_ACCESS, '\1;\2', ''), ';')
       if get(subs, 1, '') !~ s:RE_BRACKETS
-	let typename = s:GetDeclaredClassName(subs[0])
-	call s:Info('ArrayAccess. "' .items[0]. '.|"  typename: "' . typename . '"')
-	if (typename != '')
-	  let ti = s:ArrayAccess(typename, items[0])
-	endif
+        let typename = s:GetDeclaredClassName(subs[0])
+        call s:Info('ArrayAccess. "' .items[0]. '.|"  typename: "' . typename . '"')
+        if (typename != '')
+          let ti = s:ArrayAccess(typename, items[0])
+        endif
       endif
     endif
   endif
@@ -560,7 +562,7 @@ function! s:CompleteAfterDot(expr)
       continue
 
 
-    " expression of selection, field access, array access
+      " expression of selection, field access, array access
     elseif items[ii] =~ s:RE_SELECT_OR_ACCESS
       let subs = split(substitute(items[ii], s:RE_SELECT_OR_ACCESS, '\1;\2', ''), ';')
       let ident = subs[0]
@@ -568,71 +570,71 @@ function! s:CompleteAfterDot(expr)
 
       " package members
       if itemkind/10 == 2 && empty(brackets) && !s:IsKeyword(ident)
-	let qn = join(items[:ii], '.')
-	if type(ti) == type([])
-	  let idx = s:Index(ti, ident, 'word')
-	  if idx >= 0
-	    if ti[idx].kind == 'P'
-	      unlet ti
-	      let ti = s:GetMembers(qn)
-	      let ii += 1
-	      continue
-	    elseif ti[idx].kind == 'C'
-	      unlet ti
-	      let ti = s:DoGetClassInfo(qn)
-	      let itemkind = 11
-	      let ii += 1
-	      continue
-	    endif
-	  endif
-	endif
+        let qn = join(items[:ii], '.')
+        if type(ti) == type([])
+          let idx = s:Index(ti, ident, 'word')
+          if idx >= 0
+            if ti[idx].kind == 'P'
+              unlet ti
+              let ti = s:GetMembers(qn)
+              let ii += 1
+              continue
+            elseif ti[idx].kind == 'C'
+              unlet ti
+              let ti = s:DoGetClassInfo(qn)
+              let itemkind = 11
+              let ii += 1
+              continue
+            endif
+          endif
+        endif
 
 
-      " type members
+        " type members
       elseif itemkind/10 == 1 && empty(brackets)
-	if ident ==# 'class' || ident ==# 'this' || ident ==# 'super'
-	  let ti = s:DoGetClassInfo(ident == 'class' ? 'java.lang.Class' : join(items[:ii-1], '.'))
-	  let itemkind = ident ==# 'this' ? 1 : ident ==# 'super' ? 2 : 0
-	  let ii += 1
-	  continue
+        if ident ==# 'class' || ident ==# 'this' || ident ==# 'super'
+          let ti = s:DoGetClassInfo(ident == 'class' ? 'java.lang.Class' : join(items[:ii-1], '.'))
+          let itemkind = ident ==# 'this' ? 1 : ident ==# 'super' ? 2 : 0
+          let ii += 1
+          continue
 
-	elseif !s:IsKeyword(ident) && type(ti) == type({}) && get(ti, 'tag', '') == 'CLASSDEF'
-	  " accessible static field
-	  "let idx = s:Index(get(ti, 'fields', []), ident, 'n')
-	  "if idx >= 0 && s:IsStatic(ti.fields[idx].m)
-	  "  let ti = s:ArrayAccess(ti.fields[idx].t, items[ii])
-	  let members = s:SearchMember(ti, ident, 1, itemkind, 1, 0)
-	  if !empty(members[2])
-	    let ti = s:ArrayAccess(members[2][0].t, items[ii])
-	    let itemkind = 0
-	    let ii += 1
-	    continue
-	  endif
+        elseif !s:IsKeyword(ident) && type(ti) == type({}) && get(ti, 'tag', '') == 'CLASSDEF'
+          " accessible static field
+          "let idx = s:Index(get(ti, 'fields', []), ident, 'n')
+          "if idx >= 0 && s:IsStatic(ti.fields[idx].m)
+          "  let ti = s:ArrayAccess(ti.fields[idx].t, items[ii])
+          let members = s:SearchMember(ti, ident, 1, itemkind, 1, 0)
+          if !empty(members[2])
+            let ti = s:ArrayAccess(members[2][0].t, items[ii])
+            let itemkind = 0
+            let ii += 1
+            continue
+          endif
 
-	  " accessible nested type
-	  "if !empty(filter(copy(get(ti, 'classes', [])), 'strpart(v:val, strridx(v:val, ".")) ==# "' . ident . '"'))
-	  if !empty(members[0])
-	    let ti = s:DoGetClassInfo(join(items[:ii], '.'))
-	    let ii += 1
-	    continue
-	  endif
-	endif
+          " accessible nested type
+          "if !empty(filter(copy(get(ti, 'classes', [])), 'strpart(v:val, strridx(v:val, ".")) ==# "' . ident . '"'))
+          if !empty(members[0])
+            let ti = s:DoGetClassInfo(join(items[:ii], '.'))
+            let ii += 1
+            continue
+          endif
+        endif
 
 
-      " instance members
+        " instance members
       elseif itemkind/10 == 0 && !s:IsKeyword(ident)
-	if type(ti) == type({}) && get(ti, 'tag', '') == 'CLASSDEF'
-	  "let idx = s:Index(get(ti, 'fields', []), ident, 'n')
-	  "if idx >= 0
-	  "  let ti = s:ArrayAccess(ti.fields[idx].t, items[ii])
-	  let members = s:SearchMember(ti, ident, 1, itemkind, 1, 0)
-	  let itemkind = 0
-	  if !empty(members[2])
-	    let ti = s:ArrayAccess(members[2][0].t, items[ii])
-	    let ii += 1
-	    continue
-	  endif
-	endif
+        if type(ti) == type({}) && get(ti, 'tag', '') == 'CLASSDEF'
+          "let idx = s:Index(get(ti, 'fields', []), ident, 'n')
+          "if idx >= 0
+          "  let ti = s:ArrayAccess(ti.fields[idx].t, items[ii])
+          let members = s:SearchMember(ti, ident, 1, itemkind, 1, 0)
+          let itemkind = 0
+          if !empty(members[2])
+            let ti = s:ArrayAccess(members[2][0].t, items[ii])
+            let ii += 1
+            continue
+          endif
+        endif
       endif
     endif
 
@@ -643,23 +645,26 @@ function! s:CompleteAfterDot(expr)
   " type info or package info --> members
   if !empty(ti)
     if type(ti) == type({})
+      echom 'name:' . get(ti, 'name', '')
+      echom 'tag:' . get(ti, 'tag', '')
       if get(ti, 'tag', '') == 'CLASSDEF'
-	if get(ti, 'name', '') == '!'
-	  return [{'kind': 'f', 'word': 'class', 'menu': 'Class'}]
-	elseif get(ti, 'name', '') == '['
-	  return s:ARRAY_TYPE_MEMBERS
-	elseif itemkind < 20
-	  return s:DoGetMemberList(ti, itemkind)
-	endif
+        if get(ti, 'name', '') == '!'
+          return [{'kind': 'f', 'word': 'class', 'menu': 'Class'}]
+        elseif get(ti, 'name', '') == '['
+          return s:ARRAY_TYPE_MEMBERS
+        elseif itemkind < 20
+          return s:DoGetMemberList(ti, itemkind)
+        endif
       elseif get(ti, 'tag', '') == 'PACKAGE'
-	" TODO: ti -> members, in addition to packages in dirs
-	return s:GetMembers( substitute(join(items, '.'), '\s', '', 'g') )
+        " TODO: ti -> members, in addition to packages in dirs
+        return s:GetMembers( substitute(join(items, '.'), '\s', '', 'g') )
       endif
     elseif type(ti) == type([])
       return ti
     endif
   endif
 
+  echom "WTF"
   return []
 endfunction
 
@@ -1551,7 +1556,7 @@ fu! javacomplete#Searchdecl()
     for fqn in imports
       let ci = s:DoGetClassInfo(fqn)
       if !empty(ci)
-	let hint .= ' ' . fqn
+        let hint .= ' ' . fqn
       endif
       " TODO: get javadoc
     endfor
@@ -1839,7 +1844,6 @@ fu! s:IsStatic(modifier)
 endfu
 
 " utilities							{{{1
-" Convert a file name into the unique form.
 " Similar with fnamemodify(). NOTE that ':gs' should not be used.
 fu! s:fnamecanonize(fname, mods)
   return fnamemodify(a:fname, a:mods . ':gs?[\\/]\+?/?')
@@ -1852,7 +1856,7 @@ fu! s:filter(expr, string)
     let result = []
     for item in a:expr
       if eval(a:string)
-	call add(result, item)
+        call add(result, item)
       endif
     endfor
     return result
@@ -1860,7 +1864,7 @@ fu! s:filter(expr, string)
     let result = {}
     for item in items(a:expr)
       if eval(a:string)
-	let result[item[0]] = item[1]
+        let result[item[0]] = item[1]
       endif
     endfor
     return result
@@ -2288,7 +2292,7 @@ fu! s:DoGetTypeInfoForFQN(fqns, srcpath, ...)
     if !has_key(s:cache, fqn) || get(get(s:files, files[fqn], {}), 'modifiedtime', 0) != getftime(files[fqn])
       let ti = s:GetClassInfoFromSource(fqn[strridx(fqn, '.')+1:], files[fqn])
       if !empty(ti)
-	let s:cache[fqn] = s:Sort(ti)
+        let s:cache[fqn] = s:Sort(ti)
       endif
     endif
     if (a:0 == 0 || !a:1)
@@ -2593,6 +2597,18 @@ endfu
 "  return ci
 "endfu
 
+function! s:DoGetClassTagVisibility(cmd, member)
+    if a:cmd =~ '[ \t]*\<public\>'
+      let a:member['v'] = 3
+    elseif a:cmd =~ '\<protected\>'
+      let a:member['v'] = 2
+    elseif a:cmd =~ '\<private\>'
+      let a:member['v'] = 1
+    else
+      let a:member['v'] = 0
+    endif
+endfunction
+
 " To obtain information of the class in current file or current folder, or
 " even in current project.
 function! s:DoGetClassInfoFromTags(class)
@@ -2603,16 +2619,16 @@ function! s:DoGetClassInfoFromTags(class)
   for tag in tags
     if has_key(tag, 'kind')
       if tag['kind'] == 'c'
-	let filename = tag['filename']
-	let cmd = tag['cmd']
-	break
+	      let filename = tag['filename']
+        let cmd = tag['cmd']
+        break
       endif
     endif
   endfor
 
   let tags = taglist('^' . (empty(b:incomplete) ? '.*' : b:incomplete) )
   if filename != ''
-    call filter(tags, "v:val['filename'] == '" . filename . "' && has_key(v:val, 'class') ? v:val['class'] == '" . a:class . "' : 1")
+    call filter(tags, "v:val['filename'] == '" . filename . "' && (!has_key(v:val, 'class') || v:val['class'] == '" . a:class . "')")
   endif
 
   let ci = {'name': a:class}
@@ -2637,6 +2653,7 @@ function! s:DoGetClassInfoFromTags(class)
     else
       let member['m'] = ''
     endif
+    call s:DoGetClassTagVisibility(cmd, member)
 
     let desc = substitute(cmd, '/^\s*', '', '')
     let desc = substitute(desc, '\s*{\?\s*$/$', '', '')
@@ -2644,16 +2661,16 @@ function! s:DoGetClassInfoFromTags(class)
     if kind == 'm'
       " description
       if cmd =~ '\<static\>'
-	let desc = substitute(desc, '\s\+static\s\+', ' ', '')
+        let desc = substitute(desc, '\s\+static\s\+', ' ', '')
       endif
       let member['d'] = desc
 
       let member['p'] = ''
       let member['r'] = ''
       if tag['name'] == a:class
-	call add(ci['ctors'], member)
+        call add(ci['ctors'], member)
       else
-	call add(ci['methods'], member)
+        call add(ci['methods'], member)
       endif
     elseif kind == 'f'
       let member['t'] = substitute(desc, '\([a-zA-Z0-9_[\]]\)\s\+\<' . tag['name'] . '\>.*$', '\1', '')
@@ -2695,11 +2712,12 @@ endfu
 " public for all              
 " protected for this or super 
 " private for this            
-fu! s:CanAccess(mods, kind)
-  return (a:mods[-4:-4] || a:kind/10 == 0)
-	\ &&   (a:kind == 1 || a:mods[-1:]
-	\	|| (a:mods[-3:-3] && (a:kind == 1 || a:kind == 2))
-	\	|| (a:mods[-2:-2] && a:kind == 1))
+fu! s:CanAccess(m, kind)
+  return (a:m.m[-4:-4] || a:kind/10 == 0)
+	\ &&   (a:kind == 1 || a:m.m[-1:]
+	\	|| (a:m.m[-3:-3] && (a:kind == 1 || a:kind == 2))
+	\	|| (a:m.m[-2:-2] && a:kind == 1)
+  \ || (a:kind == 0 && has_key(a:m, 'v') && a:m.v == 3))
 endfu
 
 fu! s:SearchMember(ci, name, fullmatch, kind, returnAll, memberkind, ...)
@@ -2708,17 +2726,17 @@ fu! s:SearchMember(ci, name, fullmatch, kind, returnAll, memberkind, ...)
   if a:kind != 13
     for m in (a:0 > 0 && a:1 ? [] : get(a:ci, 'fields', [])) + ((a:kind == 1 || a:kind == 2) ? get(a:ci, 'declared_fields', []) : [])
       if empty(a:name) || (a:fullmatch ? m.n ==# a:name : m.n =~# '^' . a:name)
-	if s:CanAccess(m.m, a:kind)
-	  call add(result[2], m)
-	endif
+        if s:CanAccess(m, a:kind)
+          call add(result[2], m)
+        endif
       endif
     endfor
 
     for m in (a:0 > 0 && a:1 ? [] : get(a:ci, 'methods', [])) + ((a:kind == 1 || a:kind == 2) ? get(a:ci, 'declared_methods', []) : [])
       if empty(a:name) || (a:fullmatch ? m.n ==# a:name : m.n =~# '^' . a:name)
-	if s:CanAccess(m.m, a:kind)
-	  call add(result[1], m)
-	endif
+        if s:CanAccess(m, a:kind)
+          call add(result[1], m)
+        endif
       endif
     endfor
   endif
@@ -2727,9 +2745,9 @@ fu! s:SearchMember(ci, name, fullmatch, kind, returnAll, memberkind, ...)
     let types = get(a:ci, 'classes', [])
     for t in types
       if empty(a:name) || (a:fullmatch ? t[strridx(t, '.')+1:] ==# a:name : t[strridx(t, '.')+1:] =~# '^' . a:name)
-	if !has_key(s:cache, t) || !has_key(s:cache[t], 'flags') || a:kind == 1 || s:cache[t].flags[-1:]
-	  call add(result[0], t)
-	endif
+        if !has_key(s:cache, t) || !has_key(s:cache[t], 'flags') || a:kind == 1 || s:cache[t].flags[-1:]
+          call add(result[0], t)
+        endif
       endif
     endfor
   endif
@@ -2782,15 +2800,16 @@ fu! s:DoGetMemberList(ci, kind)
   let s = a:kind == 11 ? "{'kind': 'C', 'word': 'class', 'menu': 'Class'}," : ''
 
   let members = s:SearchMember(a:ci, '', 1, a:kind, 1, 0, a:kind == 2)
+  echom "members len ".len(members[2])
 
   " add accessible member types
   if a:kind / 10 != 0
     " Use dup here for member type can share name with field.
     for class in members[0]
-    "for class in get(a:ci, 'classes', [])
+      "for class in get(a:ci, 'classes', [])
       let v = get(s:cache, class, {})
       if v == {} || v.flags[-1:]
-	let s .= "{'kind': 'C', 'word': '" . substitute(class, a:ci.name . '\.', '\1', '') . "','dup':1},"
+        let s .= "{'kind': 'C', 'word': '" . substitute(class, a:ci.name . '\.', '\1', '') . "','dup':1},"
       endif
     endfor
   endif
@@ -2799,11 +2818,11 @@ fu! s:DoGetMemberList(ci, kind)
     let fieldlist = []
     let sfieldlist = []
     for field in members[2]
-    "for field in get(a:ci, 'fields', [])
+      "for field in get(a:ci, 'fields', [])
       if s:IsStatic(field['m'])
-	call add(sfieldlist, field)
+        call add(sfieldlist, field)
       elseif a:kind / 10 == 0
-	call add(fieldlist, field)
+        call add(fieldlist, field)
       endif
     endfor
 
@@ -2811,9 +2830,9 @@ fu! s:DoGetMemberList(ci, kind)
     let smethodlist = []
     for method in members[1]
       if s:IsStatic(method['m'])
-	call add(smethodlist, method)
+        call add(smethodlist, method)
       elseif a:kind / 10 == 0
-	call add(methodlist, method)
+        call add(methodlist, method)
       endif
     endfor
 
