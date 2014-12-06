@@ -6,15 +6,15 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 # Script variables
 verbose=0
 save=0
+skip_ftplugin=0
 
-while getopts "vs" opt; do
-  case "$opt" in
-    v)  verbose=$((verbose+1))
-      ;;
-    s)  save=1
-      ;;
-  esac
-done
+showHelp() {
+  echo "./install [OPTIONS]"
+  echo "  -h | --help       display this information"
+  echo "  -v | --verbose    activate verbose mode"
+  echo "  --skip-save       skip saving actual vim configuration"
+  echo "  --skip-ftplugin   skip replacing the ftplugins"
+}
 
 debug() {
   if [ $verbose -ge 1 ]; then
@@ -25,6 +25,22 @@ debug() {
 error() {
   echo "ERROR =>" $*
 }
+
+while test $# -gt 0; do
+  case $1 in
+    -v|--verbose)  verbose=$((verbose+1))
+      ;;
+    --skip-save)  save=1
+      ;;
+    --skip-ftplugin)  skip_ftplugin=1
+      ;;
+    -h|--help)  showHelp; exit 0
+      ;;
+    *) echo >&2 "Invalid argument: $1"; showHelp; exit -1
+      ;;
+  esac
+  shift
+done
 
 #################################
 ## Save previous configuration ##
@@ -103,14 +119,16 @@ fi
 debug "Copy ftdetect folder content into $ftdetect folder"
 cp -r ftdetect/* $ftdetect/
 
-# .vim/ftplugin
-ftplugin=~/.vim/ftplugin
-if [ ! -d $ftplugin ]; then
-  debug "Create $ftplugin folder"
-  mkdir $ftplugin
-fi
-debug "Copy ftplugin folder content into $ftplugin folder"
-cp -r ftplugin/* $ftplugin/
+# .vim/ftplugin <<<
+if [ $skip_ftplugin -eq 0 ]; then
+  ftplugin=~/.vim/ftplugin
+  if [ ! -d $ftplugin ]; then
+    debug "Create $ftplugin folder"
+    mkdir $ftplugin
+  fi
+  debug "Copy ftplugin folder content into $ftplugin folder"
+  cp -r ftplugin/* $ftplugin/
+fi # >>>
 
 # .vim/indent
 indent=~/.vim/indent

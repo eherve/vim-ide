@@ -43,6 +43,7 @@ set incsearch " select search result when taping
 set wildmenu " show completion menu
 set wildmode=list:longest,list:full " show all possibilities
 set wildignore=*.o,*.r,*.so,*.sl,*.tar,*.tgz,*.swp,*.jar " completion filter
+set omnifunc=syntaxcomplete#Complete
 
 " Tabulation size
 set expandtab " use space for tab
@@ -66,12 +67,20 @@ autocmd BufWrite *.coffee :call DeleteTrailingWS()
 autocmd BufWrite *.java :call DeleteTrailingWS()
 
 " ctags
-let Tlist_Ctags_Cmd='/usr/bin/ctags'
+let ctags='/usr/bin/ctags'
+let Tlist_Ctags_Cmd=ctags
 let Tlist_GainFocus_On_ToggleOpen=1
 let Tlist_Show_One_File=1
 let Tlist_Use_Right_Window=1
-set tags=tags,.tags;~
+
+set tags=.tags
 nmap <c-t> :!ctags -R -f .tags<CR>
+
+" easy tag
+let g:easytags_cmd=ctags
+let g:easytags_async=1
+let g:easytags_dynamic_files=2
+let g:easytags_events=['BufWritePost']
 
 " tagbar
 nmap <F8> :TagbarToggle<CR>
