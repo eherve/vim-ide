@@ -80,3 +80,15 @@ nmap <F8> :TagbarToggle<CR>
 nmap <F7> :Project<CR>
 let g:proj_window_width=30
 let g:proj_window_increment=25
+let g:proj_exclude_buff=['__Tagbar__']
+
+" verbose
+function! ToggleVerbose()
+    if !&verbose
+        set verbosefile=~/.log/vim/verbose.log
+        set verbose=15
+    else
+        set verbose=0
+        set verbosefile=
+    endif
+endfunction
