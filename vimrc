@@ -86,7 +86,7 @@ let g:easytags_events=['BufWritePost']
 nmap <F8> :TagbarToggle<CR>
 
 " tree
-nmap <F7> NERDTree:<CR>
+nmap <F7> :NERDTree<CR>
 
 " verbose
 function! ToggleVerbose()
