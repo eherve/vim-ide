@@ -85,11 +85,8 @@ let g:easytags_events=['BufWritePost']
 " tagbar
 nmap <F8> :TagbarToggle<CR>
 
-" project
-nmap <F7> :Project<CR>
-let g:proj_window_width=30
-let g:proj_window_increment=25
-let g:proj_exclude_buff=['__Tagbar__']
+" tree
+nmap <F7> NERDTree:<CR>
 
 " verbose
 function! ToggleVerbose()
