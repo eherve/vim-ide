@@ -6,7 +6,7 @@ set foldlevel=99
 
 " Tags
 set tags=.tags-java
-nmap <c-t> :!find -name *.java -exec ctags --sort=yes -u -f .tags-java {} \;<CR>
+nmap <c-t> :!find -name *.java -exec ctags --sort=yes -u -a -f .tags-java {} \;<CR>
 
 " Completion
 setlocal omnifunc=javacomplete#Complete

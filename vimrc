@@ -81,12 +81,17 @@ let g:easytags_cmd=ctags
 let g:easytags_async=1
 let g:easytags_dynamic_files=2
 let g:easytags_events=['BufWritePost']
+nnoremap <C-]> <Esc>:exe "ptjump " . expand("<cword>")<Esc>
 
 " tagbar
 nmap <F8> :TagbarToggle<CR>
 
 " tree
 nmap <F7> :NERDTreeToggle<CR>
+
+" vim bufsurf
+nmap <c-Left> :BufSurfBack<CR>
+nmap <c-Right> :BufSurfForward<CR>
 
 " verbose
 function! ToggleVerbose()
