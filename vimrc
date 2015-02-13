@@ -90,8 +90,8 @@ nmap <F8> :TagbarToggle<CR>
 nmap <F7> :NERDTreeToggle<CR>
 
 " vim bufsurf
-nmap <c-Left> :BufSurfBack<CR>
-nmap <c-Right> :BufSurfForward<CR>
+nmap <a-Left> :BufSurfBack<CR>
+nmap <a-Right> :BufSurfForward<CR>
 
 " verbose
 function! ToggleVerbose()
