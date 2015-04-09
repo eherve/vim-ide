@@ -93,6 +93,11 @@ nmap <F7> :NERDTreeToggle<CR>
 nmap <a-Left> :BufSurfBack<CR>
 nmap <a-Right> :BufSurfForward<CR>
 
+" ConqueTerm
+let g:ConqueTerm_Color = 2 " term colors
+let g:ConqueTerm_ReadUnfocused = 1 " still reading buffer when not focused
+let g:ConqueTerm_InsertOnEnter = 1 " insert mode on entering buffer
+
 " verbose
 function! ToggleVerbose()
     if !&verbose
